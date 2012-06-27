@@ -43,14 +43,16 @@ module Kramdown
       define_parser(:codeblock, CODEBLOCK_START)
 
 
-      FENCED_CODEBLOCK_START = /^~{3,}/
-      FENCED_CODEBLOCK_MATCH = /^(~{3,})\s*?\n(.*?)^\1~*\s*?\n/m
+      FENCED_CODEBLOCK_START = /^[~`]{3,}([\w]*)/
+      FENCED_CODEBLOCK_MATCH = /^([~`]{3,})([\w]*)\s*?\n(.*?)^\1[~`]*\s*?\n/m
 
       # Parse the fenced codeblock at the current location.
+      # M@: Added support for github-style fenced codeblocks.
       def parse_codeblock_fenced
         if @src.check(FENCED_CODEBLOCK_MATCH)
           @src.pos += @src.matched_size
-          @tree.children << new_block_el(:codeblock, @src[2])
+          attr = @src[2] == '' ? {} : { 'class'=>@src[2] }
+          @tree.children << new_block_el(:codeblock, @src[3], attr)
           true
         else
           false
